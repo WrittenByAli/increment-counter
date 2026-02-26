@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -13,7 +13,7 @@ type AdminRole = 'ALPHA' | 'BETA' | 'GAMMA' | null;
 
 interface Application {
   id: number;
-  type: 'increment' | 'decrement' | 'new_user';
+  type: 'increment' | 'decrement';
   name: string;
   amount: number;
   reason: string;
@@ -39,7 +39,7 @@ export class App {
   counters = signal<RotiEntry[]>([
     { name: 'ali', count: 7 },
     { name: 'tahir', count: 8 },
-    { name: 'lahori', count: 42 },
+    { name: 'lahori', count: 26 },
     { name: 'bilal', count: 8 },
     { name: 'taimoor', count: 10 },
     { name: 'wasay', count: 19 },
@@ -70,7 +70,7 @@ export class App {
   loginForm: FormGroup;
   appForm: FormGroup;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private cdr: ChangeDetectorRef) {
     this.loginForm = this.fb.group({
       password: ['', Validators.required]
     });
@@ -83,8 +83,14 @@ export class App {
     });
   }
 
-  toggleAdminLogin() { this.showAdminLogin.set(!this.showAdminLogin()); }
-  toggleAppForm() { this.showAppForm.set(!this.showAppForm()); }
+  toggleAdminLogin() { 
+    this.showAdminLogin.update(v => !v); 
+    this.cdr.markForCheck();
+  }
+  toggleAppForm() { 
+    this.showAppForm.update(v => !v); 
+    this.cdr.markForCheck();
+  }
 
   attemptLogin() {
     const pwd = this.loginForm.value.password;
@@ -105,6 +111,9 @@ export class App {
 
   submitApplication() {
     if (this.appForm.valid) {
+      const admin = this.currentAdmin();
+      const initialApprovals = admin ? [admin] : [];
+      
       const newApp: Application = {
         id: Date.now(),
         type: this.appForm.value.type,
@@ -112,7 +121,7 @@ export class App {
         amount: this.appForm.value.amount,
         reason: this.appForm.value.reason,
         status: 'pending',
-        approvals: [],
+        approvals: initialApprovals,
         timestamp: Date.now()
       };
       this.applications.update(apps => [...apps, newApp]);
@@ -142,35 +151,17 @@ export class App {
     if (!admin) return;
     
     this.applications.update(apps => apps.filter(a => a.id !== app.id));
-    const actionTextRej = app.type === 'increment' ? 'Increment' : app.type === 'decrement' ? 'Decrement' : 'New User';
+    const actionTextRej = app.type === 'increment' ? 'Increment' : 'Decrement';
     this.addLog(`[REJECTED] ${actionTextRej} for ${app.name} rejected by Admin ${admin}. Reason: ${app.reason}`, 'rejected');
   }
 
   executeApplication(app: Application) {
     this.counters.update(state => {
       const exists = state.find(e => e.name === app.name);
-      if (app.type === 'new_user') {
-        if (exists) return state;
-        return [...state, {name: app.name, count: Math.max(0, app.amount)}];
-      } else {
-        if (!exists) return state;
-        const modifier = app.type === 'decrement' ? -app.amount : app.amount;
-        return state.map(e => e.name === app.name ? {...e, count: Math.max(0, e.count + modifier)} : e);
-      }
+      if (!exists) return state;
+      const modifier = app.type === 'decrement' ? -app.amount : app.amount;
+      return state.map(e => e.name === app.name ? {...e, count: Math.max(0, e.count + modifier)} : e);
     });
-  }
-
-  adminDirectUpdate(name: string, amount: number) {
-    if (!this.isAdmin()) return;
-    this.counters.update(state => {
-      const exists = state.find(e => e.name === name);
-      if (exists) {
-        return state.map(e => e.name === name ? {...e, count: Math.max(0, e.count + amount)} : e);
-      } else {
-        return [...state, {name, count: Math.max(0, amount)}];
-      }
-    });
-    this.addLog(`[DIRECT OVERRIDE] Admin ${this.currentAdmin()} updated ${name} by ${amount}`, 'approved');
   }
 
   addLog(message: string, status: 'approved' | 'rejected') {

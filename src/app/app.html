@@ -1,6 +1,6 @@
 <div class="min-h-screen relative bg-[#050505] text-white font-sans selection:bg-[#00f3ff] selection:text-black pb-20">
   <!-- Scanlines & Grid -->
-  <div class="scanlines"></div>
+  <div class="scanlines pointer-events-none"></div>
   <div class="fixed inset-0 z-0 pointer-events-none">
     <div class="absolute inset-0 bg-grid opacity-30"></div>
     <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/80 to-[#050505]"></div>
@@ -45,7 +45,7 @@
           INCREMENT COUNTER
         </h1>
         <p class="text-gray-400 font-mono text-sm max-w-2xl mx-auto">
-          Live tracking of all entity consumption metrics. Standard users must submit an application to modify values or register new users. 3 Admin approvals required.
+          Live tracking of all entity consumption metrics. All users (including Admins) must submit an application to modify values. 3 Admin approvals required. No new users can be added.
         </p>
       </div>
 
@@ -79,26 +79,17 @@
                    [class.text-[#ffd700]]="i === 0"
                    [class.text-[#c0c0c0]]="i === 1"
                    [class.text-[#cd7f32]]="i === 2">{{person.count}}</div>
-              
-              @if (isAdmin()) {
-                <div class="flex gap-2">
-                  <button (click)="adminDirectUpdate(person.name, -1)" class="w-10 h-10 flex items-center justify-center border border-[#ff00ff]/50 text-[#ff00ff] hover:bg-[#ff00ff]/20 transition-colors rounded font-mono text-2xl">-</button>
-                  <button (click)="adminDirectUpdate(person.name, 1)" class="w-10 h-10 flex items-center justify-center border border-[#00f3ff]/50 text-[#00f3ff] hover:bg-[#00f3ff]/20 transition-colors rounded font-mono text-2xl">+</button>
-                </div>
-              }
             </div>
           </div>
         }
       </div>
 
-      <!-- Standard User Action -->
-      @if (!isAdmin()) {
-        <div class="flex justify-center w-full mb-24">
-          <button (click)="toggleAppForm()" class="px-8 py-4 font-mono text-sm tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer flex items-center gap-3">
-            <mat-icon>description</mat-icon> Submit Update / New User Application
-          </button>
-        </div>
-      }
+      <!-- Application Action -->
+      <div class="flex justify-center w-full mb-24">
+        <button (click)="toggleAppForm()" class="px-8 py-4 font-mono text-sm tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer flex items-center gap-3">
+          <mat-icon>description</mat-icon> Submit Update Application
+        </button>
+      </div>
 
       <!-- Admin Dashboard & Logs -->
       <div class="w-full border-t border-white/10 pt-16 mt-8">
@@ -129,7 +120,7 @@
                               [class.text-[#ff00ff]]="app.type === 'decrement'"
                               [class.border-[#ff00ff]]="app.type === 'decrement'"
                               [class.bg-[#ff00ff]/10]="app.type === 'decrement'">
-                          {{app.type === 'new_user' ? 'NEW USER' : app.type === 'decrement' ? 'DECREMENT' : 'INCREMENT'}} ({{app.type === 'decrement' ? '-' : '+'}}{{app.amount}})
+                          {{app.type === 'decrement' ? 'DECREMENT' : 'INCREMENT'}} ({{app.type === 'decrement' ? '-' : '+'}}{{app.amount}})
                         </span>
                       </div>
                       <div class="text-gray-400 text-sm font-mono mb-3">
@@ -202,7 +193,7 @@
   
   <!-- Admin Login Modal -->
   @if (showAdminLogin()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <div class="cyber-card p-8 rounded-xl w-full max-w-md relative border-[#ff00ff]/30">
         <button (click)="toggleAdminLogin()" class="absolute top-4 right-4 text-gray-500 hover:text-white">
           <mat-icon>close</mat-icon>
@@ -224,7 +215,7 @@
 
   <!-- Application Modal -->
   @if (showAppForm()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <div class="cyber-card p-8 rounded-xl w-full max-w-lg relative border-[#00f3ff]/30">
         <button (click)="toggleAppForm()" class="absolute top-4 right-4 text-gray-500 hover:text-white">
           <mat-icon>close</mat-icon>
@@ -238,7 +229,6 @@
             <select formControlName="type" class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors appearance-none">
               <option value="increment">Increment Existing User</option>
               <option value="decrement">Decrement Existing User</option>
-              <option value="new_user">Register New User</option>
             </select>
           </div>
           <div>
@@ -246,7 +236,7 @@
             <input type="text" formControlName="name" class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors" placeholder="e.g. ali">
           </div>
           <div>
-            <label class="block font-mono text-xs text-gray-400 mb-2">AMOUNT / INITIAL COUNT</label>
+            <label class="block font-mono text-xs text-gray-400 mb-2">AMOUNT</label>
             <input type="number" formControlName="amount" class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors" min="1">
           </div>
           <div>
