@@ -8,135 +8,156 @@
 
   <!-- Content -->
   <div class="relative z-10 flex flex-col min-h-screen">
-    
+
     <!-- Navbar -->
-    <nav class="flex items-center justify-between px-8 py-6 border-b border-white/5 backdrop-blur-md bg-[#050505]/50 sticky top-0 z-40">
+    <nav class="flex items-center justify-between px-4 md:px-8 py-4 md:py-6 border-b border-white/5 backdrop-blur-md bg-[#050505]/50 sticky top-0 z-40">
       <div class="flex items-center gap-2">
-        <span class="text-2xl font-bold tracking-widest text-[#00f3ff] drop-shadow-[0_0_8px_rgba(0,243,255,0.5)]">ROTI_NEXUS</span>
+        <span class="text-xl md:text-2xl font-bold tracking-widest text-[#00f3ff] drop-shadow-[0_0_8px_rgba(0,243,255,0.5)]">ROTI_NEXUS</span>
       </div>
-      
-      <div class="flex items-center gap-4">
+
+      <div class="flex items-center gap-2 md:gap-4">
         @if (isAdmin()) {
-          <span class="font-mono text-xs text-[#ff00ff] border border-[#ff00ff]/30 px-3 py-1 rounded bg-[#ff00ff]/10">
-            LOGGED IN AS: {{currentAdmin()}}
+          <span class="font-mono text-[10px] md:text-xs text-[#ff00ff] border border-[#ff00ff]/30 px-2 md:px-3 py-1 rounded bg-[#ff00ff]/10">
+            ADMIN: {{currentAdmin()}}
           </span>
         }
-        
+
         @if (!isAdmin()) {
-          <button (click)="toggleAdminLogin()" class="px-6 py-2 font-mono text-xs tracking-widest rounded-sm btn-glow-magenta uppercase cursor-pointer flex items-center gap-2">
-            <mat-icon class="text-[16px] w-4 h-4">admin_panel_settings</mat-icon> Admin Access
+          <button (click)="toggleAdminLogin()" class="px-4 md:px-6 py-2 font-mono text-[10px] md:text-xs tracking-widest rounded-sm btn-glow-magenta uppercase cursor-pointer flex items-center gap-1 md:gap-2">
+            <mat-icon class="text-[14px] md:text-[16px] w-4 h-4">admin_panel_settings</mat-icon> Admin
           </button>
         } @else {
-          <button (click)="logout()" class="px-6 py-2 font-mono text-xs tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer flex items-center gap-2">
-            <mat-icon class="text-[16px] w-4 h-4">logout</mat-icon> Disconnect
+          <button (click)="logout()" class="px-4 md:px-6 py-2 font-mono text-[10px] md:text-xs tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer flex items-center gap-1 md:gap-2">
+            <mat-icon class="text-[14px] md:text-[16px] w-4 h-4">logout</mat-icon> Disconnect
           </button>
         }
       </div>
     </nav>
 
-    <main class="flex-grow flex flex-col items-center w-full max-w-7xl mx-auto px-6 py-12">
-      
+    <main class="flex-grow flex flex-col items-center w-full max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
+
       <!-- Header -->
-      <div class="text-center mb-16 mt-8">
-        <div class="font-mono text-xs tracking-[0.2em] text-[#00f3ff] mb-4 drop-shadow-[0_0_5px_rgba(0,243,255,0.5)]">
+      <div class="text-center mb-10 md:mb-16 mt-4 md:mt-8">
+        <div class="font-mono text-[10px] md:text-xs tracking-[0.2em] text-[#00f3ff] mb-3 md:mb-4 drop-shadow-[0_0_5px_rgba(0,243,255,0.5)]">
           // ACTIVE PROTOCOL: ROTI DECIDER
         </div>
-        <h1 class="text-5xl md:text-7xl font-bold tracking-tighter mb-6 text-gradient">
+        <h1 class="text-4xl md:text-7xl font-bold tracking-tighter mb-4 md:mb-6 text-gradient">
           INCREMENT COUNTER
         </h1>
-        <p class="text-gray-400 font-mono text-sm max-w-2xl mx-auto">
-          Live tracking of all entity consumption metrics. All users (including Admins) must submit an application to modify values. 3 Admin approvals required. No new users can be added.
+        <p class="text-gray-400 font-mono text-[10px] md:text-sm max-w-2xl mx-auto leading-relaxed">
+          Live tracking of all entity consumption metrics. Everyone must submit an application to modify values.
+          3 Admin approvals required. No new users can be added. Top 3 give the roti.
         </p>
       </div>
 
-      <!-- Counters List (Ranked in one column) -->
-      <div class="flex flex-col gap-4 w-full max-w-4xl mx-auto mb-16 mt-4">
-        @for (person of rankedCounters(); track person.name; let i = $index) {
-          <div class="cyber-card p-4 md:p-6 rounded-lg flex flex-col md:flex-row items-center justify-between relative group"
-               [class.border-[#ffd700]]="i === 0" [class.shadow-[0_0_15px_rgba(255,215,0,0.2)]]="i === 0"
-               [class.border-[#c0c0c0]]="i === 1" [class.shadow-[0_0_15px_rgba(192,192,192,0.2)]]="i === 1"
-               [class.border-[#cd7f32]]="i === 2" [class.shadow-[0_0_15px_rgba(205,127,50,0.2)]]="i === 2">
-            
-            <div class="flex items-center gap-4 w-full md:w-auto mb-4 md:mb-0">
-              <div class="text-2xl font-bold text-gray-600 w-8 text-center"
-                   [class.text-[#ffd700]]="i === 0"
-                   [class.text-[#c0c0c0]]="i === 1"
-                   [class.text-[#cd7f32]]="i === 2">#{{i + 1}}</div>
-              <div class="text-lg md:text-xl font-mono tracking-widest uppercase">{{person.name}}</div>
-              
-              @if (i === 0) { <div class="hidden md:block bg-[#ffd700] text-black text-[10px] font-bold px-2 py-1 rounded-sm shadow-[0_0_10px_#ffd700] whitespace-nowrap ml-2">🥇 GOLD - GIVES ROTI</div> }
-              @if (i === 1) { <div class="hidden md:block bg-[#c0c0c0] text-black text-[10px] font-bold px-2 py-1 rounded-sm shadow-[0_0_10px_#c0c0c0] whitespace-nowrap ml-2">🥈 SILVER - GIVES ROTI</div> }
-              @if (i === 2) { <div class="hidden md:block bg-[#cd7f32] text-white text-[10px] font-bold px-2 py-1 rounded-sm shadow-[0_0_10px_#cd7f32] whitespace-nowrap ml-2">🥉 BRONZE - GIVES ROTI</div> }
-            </div>
-
-            <!-- Mobile Badges -->
-            @if (i === 0) { <div class="md:hidden bg-[#ffd700] text-black text-[10px] font-bold px-2 py-1 rounded-sm shadow-[0_0_10px_#ffd700] whitespace-nowrap mb-4">🥇 GOLD - GIVES ROTI</div> }
-            @if (i === 1) { <div class="md:hidden bg-[#c0c0c0] text-black text-[10px] font-bold px-2 py-1 rounded-sm shadow-[0_0_10px_#c0c0c0] whitespace-nowrap mb-4">🥈 SILVER - GIVES ROTI</div> }
-            @if (i === 2) { <div class="md:hidden bg-[#cd7f32] text-white text-[10px] font-bold px-2 py-1 rounded-sm shadow-[0_0_10px_#cd7f32] whitespace-nowrap mb-4">🥉 BRONZE - GIVES ROTI</div> }
-
-            <div class="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
-              <div class="text-4xl md:text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
-                   [class.text-[#ffd700]]="i === 0"
-                   [class.text-[#c0c0c0]]="i === 1"
-                   [class.text-[#cd7f32]]="i === 2">{{person.count}}</div>
-            </div>
-          </div>
-        }
-      </div>
-
-      <!-- Application Action -->
-      <div class="flex justify-center w-full mb-24">
-        <button (click)="toggleAppForm()" class="px-8 py-4 font-mono text-sm tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer flex items-center gap-3">
+      <!-- Submit Application Button -->
+      <div class="flex justify-center w-full mb-10 md:mb-16">
+        <button (click)="toggleAppForm()" class="px-6 md:px-8 py-3 md:py-4 font-mono text-xs md:text-sm tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer flex items-center gap-2 md:gap-3">
           <mat-icon>description</mat-icon> Submit Update Application
         </button>
       </div>
 
-      <!-- Admin Dashboard & Logs -->
-      <div class="w-full border-t border-white/10 pt-16 mt-8">
-        
-        @if (isAdmin()) {
-          <div class="font-mono text-xs tracking-[0.2em] text-[#ff00ff] mb-8 drop-shadow-[0_0_5px_rgba(255,0,255,0.5)] flex items-center gap-4">
+      <!-- Ranked Counters List (Single Column) -->
+      <div class="flex flex-col gap-3 md:gap-4 w-full mb-10 md:mb-16">
+        @for (person of rankedCounters(); track person.name; let i = $index) {
+          <div class="cyber-card p-3 md:p-5 rounded-lg flex items-center justify-between relative group transition-all"
+               [style.border-color]="getRankColor(i) || 'rgba(255,255,255,0.1)'"
+               [style.box-shadow]="i < 3 ? '0 0 15px ' + getRankColor(i) + '33' : 'none'">
+
+            <!-- Rank + Name -->
+            <div class="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+              <div class="text-lg md:text-2xl font-bold w-6 md:w-8 text-center shrink-0"
+                   [style.color]="getRankColor(i) || '#4b5563'">#{{i + 1}}</div>
+
+              <div class="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+                <div class="text-sm md:text-lg font-mono tracking-wider uppercase truncate">{{person.name}}</div>
+
+                @if (i < 3) {
+                  <div class="hidden md:block text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-sm whitespace-nowrap shrink-0"
+                       [style.background-color]="getRankColor(i)"
+                       [style.color]="i === 2 ? 'white' : 'black'"
+                       [style.box-shadow]="'0 0 10px ' + getRankColor(i)">
+                    {{getRankBadge(i)}}
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Count -->
+            <div class="text-2xl md:text-4xl font-bold shrink-0 ml-4 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+                 [style.color]="getRankColor(i) || 'white'">
+              {{person.count}}
+            </div>
+          </div>
+
+          <!-- Mobile Badge (below the card) -->
+          @if (i < 3) {
+            <div class="md:hidden flex justify-center -mt-2 mb-1">
+              <div class="text-[9px] font-bold px-2 py-0.5 rounded-sm whitespace-nowrap"
+                   [style.background-color]="getRankColor(i)"
+                   [style.color]="i === 2 ? 'white' : 'black'"
+                   [style.box-shadow]="'0 0 10px ' + getRankColor(i)">
+                {{getRankBadge(i)}}
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      <!-- =============== ADMIN DASHBOARD =============== -->
+      @if (isAdmin()) {
+        <div class="w-full border-t border-white/10 pt-10 md:pt-16 mt-4 md:mt-8">
+          <div class="font-mono text-xs tracking-[0.2em] text-[#ff00ff] mb-6 md:mb-8 drop-shadow-[0_0_5px_rgba(255,0,255,0.5)] flex items-center gap-4">
             <span class="w-8 h-[1px] bg-[#ff00ff]/50"></span>
-            // ADMIN DASHBOARD
+            // ADMIN DASHBOARD — {{currentAdmin()}}
             <span class="w-8 h-[1px] bg-[#ff00ff]/50"></span>
           </div>
 
           <!-- Pending Applications -->
-          <div class="cyber-card p-8 rounded-lg w-full mb-8">
-            <h3 class="text-xl font-bold mb-6 tracking-wide text-[#ff00ff]">PENDING APPLICATIONS ({{applications().length}})</h3>
-            
+          <div class="cyber-card p-4 md:p-8 rounded-lg w-full mb-8">
+            <h3 class="text-lg md:text-xl font-bold mb-4 md:mb-6 tracking-wide text-[#ff00ff]">
+              PENDING APPLICATIONS ({{applications().length}})
+            </h3>
+
             @if (applications().length === 0) {
-              <div class="text-gray-500 font-mono text-sm italic py-8 text-center border border-dashed border-white/10">
+              <div class="text-gray-500 font-mono text-sm italic py-6 md:py-8 text-center border border-dashed border-white/10 rounded">
                 No pending applications in the queue.
               </div>
             } @else {
               <div class="flex flex-col gap-4">
                 @for (app of applications(); track app.id) {
-                  <div class="bg-black/40 border border-white/5 p-4 rounded flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div class="bg-black/40 border border-white/5 p-4 rounded flex flex-col gap-4">
+                    <!-- App Info -->
                     <div class="flex-grow">
-                      <div class="flex items-center gap-3 mb-2">
-                        <span class="font-bold text-lg uppercase">{{app.name}}</span>
-                        <span class="px-2 py-0.5 bg-[#00f3ff]/10 text-[#00f3ff] border border-[#00f3ff]/30 text-xs font-mono rounded uppercase"
+                      <div class="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
+                        <span class="font-bold text-base md:text-lg uppercase">{{app.name}}</span>
+                        <span class="px-2 py-0.5 text-xs font-mono rounded uppercase border"
+                              [class.text-[#00f3ff]]="app.type === 'increment'"
+                              [class.border-[#00f3ff]/30]="app.type === 'increment'"
+                              [class.bg-[#00f3ff]/10]="app.type === 'increment'"
                               [class.text-[#ff00ff]]="app.type === 'decrement'"
-                              [class.border-[#ff00ff]]="app.type === 'decrement'"
+                              [class.border-[#ff00ff]/30]="app.type === 'decrement'"
                               [class.bg-[#ff00ff]/10]="app.type === 'decrement'">
                           {{app.type === 'decrement' ? 'DECREMENT' : 'INCREMENT'}} ({{app.type === 'decrement' ? '-' : '+'}}{{app.amount}})
                         </span>
+                        @if (app.submitted_by) {
+                          <span class="text-[10px] text-gray-500 font-mono">by {{app.submitted_by}}</span>
+                        }
                       </div>
-                      <div class="text-gray-400 text-sm font-mono mb-3">
+                      <div class="text-gray-400 text-xs md:text-sm font-mono mb-3">
                         <span class="text-gray-600">REASON:</span> {{app.reason}}
                       </div>
-                      
+
                       <!-- Approval Progress -->
                       <div class="flex flex-col gap-1">
                         <div class="flex items-center gap-2">
-                          <div class="h-1.5 w-32 bg-black/50 rounded-full overflow-hidden border border-white/10">
-                            <div class="h-full bg-[#00f3ff] transition-all" [style.width]="(app.approvals.length / 3) * 100 + '%'"></div>
+                          <div class="h-1.5 w-24 md:w-32 bg-black/50 rounded-full overflow-hidden border border-white/10">
+                            <div class="h-full bg-[#00f3ff] transition-all duration-500" [style.width]="(app.approvals.length / 3) * 100 + '%'"></div>
                           </div>
                           <span class="font-mono text-[10px] text-[#00f3ff]">{{app.approvals.length}}/3 APPROVALS</span>
                         </div>
                         @if (app.approvals.length > 0) {
-                          <div class="flex gap-1 mt-1">
+                          <div class="flex gap-1 mt-1 flex-wrap">
                             @for (admin of app.approvals; track admin) {
                               <span class="px-1.5 py-0.5 bg-white/10 text-white text-[9px] rounded font-mono">{{admin}}</span>
                             }
@@ -145,12 +166,17 @@
                       </div>
                     </div>
 
-                    <div class="flex gap-2 shrink-0 mt-4 md:mt-0">
-                      <button (click)="approveApplication(app)" [disabled]="hasApproved(app)" class="px-4 py-2 bg-[#00f3ff]/10 text-[#00f3ff] border border-[#00f3ff]/50 hover:bg-[#00f3ff]/20 font-mono text-xs tracking-wider rounded transition-colors flex items-center gap-1 disabled:opacity-30 disabled:cursor-not-allowed">
-                        <mat-icon class="text-[16px] w-4 h-4">check</mat-icon> {{ hasApproved(app) ? 'APPROVED' : 'APPROVE' }}
+                    <!-- Action Buttons -->
+                    <div class="flex gap-2 shrink-0">
+                      <button (click)="approveApplication(app)"
+                              [disabled]="hasApproved(app)"
+                              class="px-3 md:px-4 py-2 bg-[#00f3ff]/10 text-[#00f3ff] border border-[#00f3ff]/50 hover:bg-[#00f3ff]/20 font-mono text-[10px] md:text-xs tracking-wider rounded transition-colors flex items-center gap-1 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer">
+                        <mat-icon class="text-[14px] md:text-[16px] w-4 h-4">check</mat-icon>
+                        {{ hasApproved(app) ? 'APPROVED' : 'APPROVE' }}
                       </button>
-                      <button (click)="rejectApplication(app)" class="px-4 py-2 bg-[#ff00ff]/10 text-[#ff00ff] border border-[#ff00ff]/50 hover:bg-[#ff00ff]/20 font-mono text-xs tracking-wider rounded transition-colors flex items-center gap-1">
-                        <mat-icon class="text-[16px] w-4 h-4">close</mat-icon> REJECT
+                      <button (click)="rejectApplication(app)"
+                              class="px-3 md:px-4 py-2 bg-[#ff00ff]/10 text-[#ff00ff] border border-[#ff00ff]/50 hover:bg-[#ff00ff]/20 font-mono text-[10px] md:text-xs tracking-wider rounded transition-colors flex items-center gap-1 cursor-pointer">
+                        <mat-icon class="text-[14px] md:text-[16px] w-4 h-4">close</mat-icon> REJECT
                       </button>
                     </div>
                   </div>
@@ -158,24 +184,26 @@
               </div>
             }
           </div>
-        }
+        </div>
+      }
 
-        <!-- System Logs (Visible to everyone) -->
-        <div class="font-mono text-xs tracking-[0.2em] text-[#00f3ff] mb-8 drop-shadow-[0_0_5px_rgba(0,243,255,0.5)] flex items-center gap-4">
+      <!-- =============== SYSTEM LOGS =============== -->
+      <div class="w-full" [class.border-t]="!isAdmin()" [class.border-white/10]="!isAdmin()" [class.pt-10]="!isAdmin()" [class.md:pt-16]="!isAdmin()" [class.mt-4]="!isAdmin()">
+        <div class="font-mono text-xs tracking-[0.2em] text-[#00f3ff] mb-6 md:mb-8 drop-shadow-[0_0_5px_rgba(0,243,255,0.5)] flex items-center gap-4">
           <span class="w-8 h-[1px] bg-[#00f3ff]/50"></span>
           // SYSTEM LOGS
           <span class="w-8 h-[1px] bg-[#00f3ff]/50"></span>
         </div>
-        
-        <div class="cyber-card p-6 rounded-lg w-full">
+
+        <div class="cyber-card p-4 md:p-6 rounded-lg w-full">
           <div class="flex flex-col gap-2 max-h-80 overflow-y-auto pr-2">
             @for (log of logs(); track log.id) {
-              <div class="font-mono text-xs p-3 border-l-2 bg-black/40"
+              <div class="font-mono text-[10px] md:text-xs p-2 md:p-3 border-l-2 bg-black/40"
                    [class.border-[#00f3ff]]="log.status === 'approved'"
                    [class.text-[#00f3ff]]="log.status === 'approved'"
                    [class.border-[#ff00ff]]="log.status === 'rejected'"
                    [class.text-[#ff00ff]]="log.status === 'rejected'">
-                <span class="opacity-50 mr-2 text-white">[{{log.timestamp | date:'shortTime'}}]</span>
+                <span class="opacity-50 mr-2 text-white">[{{log.timestamp | date:'short'}}]</span>
                 {{log.message}}
               </div>
             }
@@ -184,28 +212,39 @@
             }
           </div>
         </div>
-
       </div>
+
     </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-gray-600 font-mono text-[10px] tracking-widest border-t border-white/5">
+      ROTI_NEXUS v2.0 // 3-ADMIN APPROVAL PROTOCOL
+    </footer>
   </div>
 
-  <!-- Modals -->
-  
+  <!-- =============== MODALS =============== -->
+
   <!-- Admin Login Modal -->
   @if (showAdminLogin()) {
-    <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div class="cyber-card p-8 rounded-xl w-full max-w-md relative border-[#ff00ff]/30">
-        <button (click)="toggleAdminLogin()" class="absolute top-4 right-4 text-gray-500 hover:text-white">
+    <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" (click)="toggleAdminLogin()">
+      <div class="cyber-card p-6 md:p-8 rounded-xl w-full max-w-md relative border-[#ff00ff]/30" (click)="$event.stopPropagation()">
+        <button (click)="toggleAdminLogin()" class="absolute top-4 right-4 text-gray-500 hover:text-white cursor-pointer">
           <mat-icon>close</mat-icon>
         </button>
-        <h2 class="text-2xl font-bold mb-6 text-[#ff00ff] tracking-widest">ADMIN_AUTH</h2>
-        <p class="text-gray-400 font-mono text-xs mb-6">Enter one of the 3 admin passwords.</p>
-        <form [formGroup]="loginForm" (ngSubmit)="attemptLogin()" class="flex flex-col gap-6">
+        <h2 class="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-[#ff00ff] tracking-widest">ADMIN_AUTH</h2>
+        <p class="text-gray-400 font-mono text-[10px] md:text-xs mb-4 md:mb-6">
+          Enter one of the 3 admin passwords:<br>
+          <span class="text-gray-600">ALPHA • BETA • GAMMA</span>
+        </p>
+        <form [formGroup]="loginForm" (ngSubmit)="attemptLogin()" class="flex flex-col gap-4 md:gap-6">
           <div>
-            <label class="block font-mono text-xs text-gray-400 mb-2">ACCESS KEY</label>
-            <input type="password" formControlName="password" class="w-full bg-black/50 border border-[#ff00ff]/30 focus:border-[#ff00ff] text-white px-4 py-3 font-mono outline-none transition-colors" placeholder="Enter password...">
+            <label class="block font-mono text-[10px] md:text-xs text-gray-400 mb-2">ACCESS KEY</label>
+            <input type="password" formControlName="password"
+                   class="w-full bg-black/50 border border-[#ff00ff]/30 focus:border-[#ff00ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors rounded"
+                   placeholder="Enter password...">
           </div>
-          <button type="submit" [disabled]="!loginForm.valid" class="w-full py-4 font-mono text-sm tracking-widest rounded-sm btn-glow-magenta uppercase cursor-pointer disabled:opacity-50">
+          <button type="submit" [disabled]="!loginForm.valid"
+                  class="w-full py-3 md:py-4 font-mono text-xs md:text-sm tracking-widest rounded-sm btn-glow-magenta uppercase cursor-pointer disabled:opacity-50">
             Authenticate
           </button>
         </form>
@@ -215,35 +254,55 @@
 
   <!-- Application Modal -->
   @if (showAppForm()) {
-    <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div class="cyber-card p-8 rounded-xl w-full max-w-lg relative border-[#00f3ff]/30">
-        <button (click)="toggleAppForm()" class="absolute top-4 right-4 text-gray-500 hover:text-white">
+    <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" (click)="toggleAppForm()">
+      <div class="cyber-card p-6 md:p-8 rounded-xl w-full max-w-lg relative border-[#00f3ff]/30" (click)="$event.stopPropagation()">
+        <button (click)="toggleAppForm()" class="absolute top-4 right-4 text-gray-500 hover:text-white cursor-pointer">
           <mat-icon>close</mat-icon>
         </button>
-        <h2 class="text-2xl font-bold mb-2 text-[#00f3ff] tracking-widest">SUBMIT_APPLICATION</h2>
-        <p class="text-gray-400 font-mono text-xs mb-6">Requires 3 Admin approvals to execute.</p>
-        
-        <form [formGroup]="appForm" (ngSubmit)="submitApplication()" class="flex flex-col gap-5">
+        <h2 class="text-xl md:text-2xl font-bold mb-2 text-[#00f3ff] tracking-widest">SUBMIT_APPLICATION</h2>
+        <p class="text-gray-400 font-mono text-[10px] md:text-xs mb-4 md:mb-6">
+          Requires 3 Admin approvals to execute. All admins must approve.
+          @if (isAdmin()) {
+            <br><span class="text-[#ff00ff]">Your approval ({{currentAdmin()}}) will auto-count as 1/3.</span>
+          }
+        </p>
+
+        <form [formGroup]="appForm" (ngSubmit)="submitApplication()" class="flex flex-col gap-4 md:gap-5">
           <div>
-            <label class="block font-mono text-xs text-gray-400 mb-2">REQUEST TYPE</label>
-            <select formControlName="type" class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors appearance-none">
-              <option value="increment">Increment Existing User</option>
-              <option value="decrement">Decrement Existing User</option>
+            <label class="block font-mono text-[10px] md:text-xs text-gray-400 mb-2">REQUEST TYPE</label>
+            <select formControlName="type"
+                    class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors appearance-none rounded">
+              <option value="increment">⬆ Increment Counter</option>
+              <option value="decrement">⬇ Decrement Counter</option>
             </select>
           </div>
+
           <div>
-            <label class="block font-mono text-xs text-gray-400 mb-2">TARGET ENTITY (NAME)</label>
-            <input type="text" formControlName="name" class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors" placeholder="e.g. ali">
+            <label class="block font-mono text-[10px] md:text-xs text-gray-400 mb-2">TARGET ENTITY</label>
+            <select formControlName="name"
+                    class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors appearance-none rounded">
+              @for (name of validNames(); track name) {
+                <option [value]="name">{{name | uppercase}}</option>
+              }
+            </select>
           </div>
+
           <div>
-            <label class="block font-mono text-xs text-gray-400 mb-2">AMOUNT</label>
-            <input type="number" formControlName="amount" class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors" min="1">
+            <label class="block font-mono text-[10px] md:text-xs text-gray-400 mb-2">AMOUNT</label>
+            <input type="number" formControlName="amount"
+                   class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors rounded"
+                   min="1">
           </div>
+
           <div>
-            <label class="block font-mono text-xs text-gray-400 mb-2">JUSTIFICATION / REASON</label>
-            <textarea formControlName="reason" rows="3" class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors resize-none" placeholder="Provide a detailed reason..."></textarea>
+            <label class="block font-mono text-[10px] md:text-xs text-gray-400 mb-2">JUSTIFICATION / REASON</label>
+            <textarea formControlName="reason" rows="3"
+                      class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors resize-none rounded"
+                      placeholder="Provide a detailed reason (min 5 chars)..."></textarea>
           </div>
-          <button type="submit" [disabled]="!appForm.valid" class="w-full mt-2 py-4 font-mono text-sm tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+
+          <button type="submit" [disabled]="!appForm.valid"
+                  class="w-full mt-2 py-3 md:py-4 font-mono text-xs md:text-sm tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
             Transmit Request
           </button>
         </form>
