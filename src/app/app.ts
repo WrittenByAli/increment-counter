@@ -1,8 +1,15 @@
-import { ChangeDetectionStrategy, Component, signal, computed, ChangeDetectorRef, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, computed, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
+// --- SUPABASE CONFIGURATION ---
+// IMPORTANT: A password alone is not enough to connect to Supabase from the frontend.
+// You MUST provide your Supabase Project URL and Anon Key below.
+const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
 
 interface RotiEntry {
   name: string;
@@ -29,33 +36,14 @@ interface LogEntry {
   timestamp: number;
 }
 
-const DEFAULT_COUNTERS: RotiEntry[] = [
-  { name: 'ali', count: 7 },
-  { name: 'tahir', count: 8 },
-  { name: 'lahori', count: 26 },
-  { name: 'bilal', count: 8 },
-  { name: 'taimoor', count: 10 },
-  { name: 'wasay', count: 19 },
-  { name: 'taha', count: 7 },
-  { name: 'zain jabir', count: 4 },
-  { name: 'zain sheikh', count: 7 },
-  { name: 'salman', count: 1 },
-  { name: 'rayyan', count: 2 },
-  { name: 'theta', count: 2 },
-  { name: 'tawassul', count: 6 },
-  { name: 'sheikh', count: 2 },
-  { name: 'abdullah adnan', count: 6 }
-];
-
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
   imports: [RouterOutlet, MatIconModule, ReactiveFormsModule, DatePipe],
   templateUrl: './app.html',
 })
-export class App {
+export class App implements OnInit, OnDestroy {
   counters = signal<RotiEntry[]>([]);
-
   rankedCounters = computed(() => {
     return [...this.counters()].sort((a, b) => b.count - a.count);
   });
@@ -72,20 +60,10 @@ export class App {
   loginForm: FormGroup;
   appForm: FormGroup;
 
-  constructor(private fb: FormBuilder, private cdr: ChangeDetectorRef) {
-    this.counters.set(this.loadFromStorage('roti_counters', DEFAULT_COUNTERS));
-    this.applications.set(this.loadFromStorage('roti_apps', []));
-    this.logs.set(this.loadFromStorage('roti_logs', []));
+  private supabase: SupabaseClient;
 
-    effect(() => {
-      this.saveToStorage('roti_counters', this.counters());
-    });
-    effect(() => {
-      this.saveToStorage('roti_apps', this.applications());
-    });
-    effect(() => {
-      this.saveToStorage('roti_logs', this.logs());
-    });
+  constructor(private fb: FormBuilder, private cdr: ChangeDetectorRef) {
+    this.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     this.loginForm = this.fb.group({
       password: ['', Validators.required]
@@ -97,6 +75,40 @@ export class App {
       amount: [1, [Validators.required, Validators.min(1)]],
       reason: ['', Validators.required]
     });
+  }
+
+  async ngOnInit() {
+    if (SUPABASE_URL.includes('YOUR_PROJECT_ID')) {
+      console.warn('Supabase is not configured. Please add your URL and Key.');
+      return;
+    }
+    await this.fetchData();
+    this.setupRealtime();
+  }
+
+  ngOnDestroy() {
+    this.supabase.removeAllChannels();
+  }
+
+  async fetchData() {
+    const { data: counters } = await this.supabase.from('counters').select('*');
+    if (counters) this.counters.set(counters);
+
+    const { data: apps } = await this.supabase.from('applications').select('*');
+    if (apps) this.applications.set(apps);
+
+    const { data: logs } = await this.supabase.from('logs').select('*').order('timestamp', { ascending: false }).limit(50);
+    if (logs) this.logs.set(logs);
+
+    this.cdr.markForCheck();
+  }
+
+  setupRealtime() {
+    this.supabase.channel('public:all')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'counters' }, () => this.fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, () => this.fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => this.fetchData())
+      .subscribe();
   }
 
   toggleAdminLogin() { 
@@ -125,7 +137,7 @@ export class App {
     this.currentAdmin.set(null);
   }
 
-  submitApplication() {
+  async submitApplication() {
     if (this.appForm.valid) {
       const admin = this.currentAdmin();
       const initialApprovals = admin ? [admin] : [];
@@ -140,78 +152,58 @@ export class App {
         approvals: initialApprovals,
         timestamp: Date.now()
       };
-      this.applications.update(apps => [...apps, newApp]);
+      
+      await this.supabase.from('applications').insert([newApp]);
+
       this.showAppForm.set(false);
       this.appForm.reset({type: 'increment', amount: 1});
     }
   }
 
-  approveApplication(app: Application) {
+  async approveApplication(app: Application) {
     const admin = this.currentAdmin();
     if (!admin || app.approvals.includes(admin)) return;
 
     const updatedApprovals = [...app.approvals, admin];
     
     if (updatedApprovals.length >= 3) {
-      this.executeApplication(app);
-      this.applications.update(apps => apps.filter(a => a.id !== app.id));
-      const actionText = app.type === 'increment' ? 'Incremented' : app.type === 'decrement' ? 'Decremented' : 'Added';
-      this.addLog(`[APPROVED] ${actionText} ${app.name} by ${app.amount}. Reason: ${app.reason}`, 'approved');
+      const { data: counter } = await this.supabase.from('counters').select('count').eq('name', app.name).single();
+      if (counter) {
+        const modifier = app.type === 'decrement' ? -app.amount : app.amount;
+        await this.supabase.from('counters').update({ count: Math.max(0, counter.count + modifier) }).eq('name', app.name);
+      }
+      
+      await this.supabase.from('applications').delete().eq('id', app.id);
+      
+      const actionText = app.type === 'increment' ? 'Incremented' : 'Decremented';
+      await this.supabase.from('logs').insert([{
+        id: Date.now(),
+        message: `[APPROVED] ${actionText} ${app.name} by ${app.amount}. Reason: ${app.reason}`,
+        status: 'approved',
+        timestamp: Date.now()
+      }]);
     } else {
-      this.applications.update(apps => apps.map(a => a.id === app.id ? {...a, approvals: updatedApprovals} : a));
+      await this.supabase.from('applications').update({ approvals: updatedApprovals }).eq('id', app.id);
     }
   }
 
-  rejectApplication(app: Application) {
+  async rejectApplication(app: Application) {
     const admin = this.currentAdmin();
     if (!admin) return;
     
-    this.applications.update(apps => apps.filter(a => a.id !== app.id));
+    await this.supabase.from('applications').delete().eq('id', app.id);
+    
     const actionTextRej = app.type === 'increment' ? 'Increment' : 'Decrement';
-    this.addLog(`[REJECTED] ${actionTextRej} for ${app.name} rejected by Admin ${admin}. Reason: ${app.reason}`, 'rejected');
-  }
-
-  executeApplication(app: Application) {
-    this.counters.update(state => {
-      const exists = state.find(e => e.name === app.name);
-      if (!exists) return state;
-      const modifier = app.type === 'decrement' ? -app.amount : app.amount;
-      return state.map(e => e.name === app.name ? {...e, count: Math.max(0, e.count + modifier)} : e);
-    });
-  }
-
-  addLog(message: string, status: 'approved' | 'rejected') {
-    const newLog: LogEntry = {
+    await this.supabase.from('logs').insert([{
       id: Date.now(),
-      message,
-      status,
+      message: `[REJECTED] ${actionTextRej} for ${app.name} rejected by Admin ${admin}. Reason: ${app.reason}`,
+      status: 'rejected',
       timestamp: Date.now()
-    };
-    this.logs.update(logs => [newLog, ...logs].slice(0, 50));
+    }]);
   }
-  
+
   hasApproved(app: Application): boolean {
     const admin = this.currentAdmin();
     return admin ? app.approvals.includes(admin) : false;
-  }
-
-  private loadFromStorage<T>(key: string, defaultValue: T): T {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const stored = localStorage.getItem(key);
-      if (stored) {
-        try {
-          return JSON.parse(stored);
-        } catch (e) {
-          console.error('Error parsing storage', e);
-        }
-      }
-    }
-    return defaultValue;
-  }
-
-  private saveToStorage<T>(key: string, value: T) {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.setItem(key, JSON.stringify(value));
-    }
   }
 }
