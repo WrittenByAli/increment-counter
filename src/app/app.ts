@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal, computed, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, computed, ChangeDetectorRef, effect } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -29,6 +29,24 @@ interface LogEntry {
   timestamp: number;
 }
 
+const DEFAULT_COUNTERS: RotiEntry[] = [
+  { name: 'ali', count: 7 },
+  { name: 'tahir', count: 8 },
+  { name: 'lahori', count: 26 },
+  { name: 'bilal', count: 8 },
+  { name: 'taimoor', count: 10 },
+  { name: 'wasay', count: 19 },
+  { name: 'taha', count: 7 },
+  { name: 'zain jabir', count: 4 },
+  { name: 'zain sheikh', count: 7 },
+  { name: 'salman', count: 1 },
+  { name: 'rayyan', count: 2 },
+  { name: 'theta', count: 2 },
+  { name: 'tawassul', count: 6 },
+  { name: 'sheikh', count: 2 },
+  { name: 'abdullah adnan', count: 6 }
+];
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
@@ -36,23 +54,7 @@ interface LogEntry {
   templateUrl: './app.html',
 })
 export class App {
-  counters = signal<RotiEntry[]>([
-    { name: 'ali', count: 7 },
-    { name: 'tahir', count: 8 },
-    { name: 'lahori', count: 26 },
-    { name: 'bilal', count: 8 },
-    { name: 'taimoor', count: 10 },
-    { name: 'wasay', count: 19 },
-    { name: 'taha', count: 7 },
-    { name: 'zain jabir', count: 4 },
-    { name: 'zain sheikh', count: 7 },
-    { name: 'salman', count: 1 },
-    { name: 'rayyan', count: 2 },
-    { name: 'theta', count: 2 },
-    { name: 'tawassul', count: 6 },
-    { name: 'sheikh', count: 2 },
-    { name: 'abdullah adnan', count: 6 }
-  ]);
+  counters = signal<RotiEntry[]>([]);
 
   rankedCounters = computed(() => {
     return [...this.counters()].sort((a, b) => b.count - a.count);
@@ -71,6 +73,20 @@ export class App {
   appForm: FormGroup;
 
   constructor(private fb: FormBuilder, private cdr: ChangeDetectorRef) {
+    this.counters.set(this.loadFromStorage('roti_counters', DEFAULT_COUNTERS));
+    this.applications.set(this.loadFromStorage('roti_apps', []));
+    this.logs.set(this.loadFromStorage('roti_logs', []));
+
+    effect(() => {
+      this.saveToStorage('roti_counters', this.counters());
+    });
+    effect(() => {
+      this.saveToStorage('roti_apps', this.applications());
+    });
+    effect(() => {
+      this.saveToStorage('roti_logs', this.logs());
+    });
+
     this.loginForm = this.fb.group({
       password: ['', Validators.required]
     });
@@ -177,5 +193,25 @@ export class App {
   hasApproved(app: Application): boolean {
     const admin = this.currentAdmin();
     return admin ? app.approvals.includes(admin) : false;
+  }
+
+  private loadFromStorage<T>(key: string, defaultValue: T): T {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch (e) {
+          console.error('Error parsing storage', e);
+        }
+      }
+    }
+    return defaultValue;
+  }
+
+  private saveToStorage<T>(key: string, value: T) {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
   }
 }
