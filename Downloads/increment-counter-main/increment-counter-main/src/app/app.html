@@ -11,27 +11,27 @@
   <nav class="navbar">
     <div class="brand">
       <span class="brand-dot"></span>
-      <span class="brand-name">ROTI_NEXUS</span>
+      <span class="brand-name">RAMADAN_COUNTER</span>
     </div>
 
     <div class="nav-actions">
       @if (isAdmin()) {
-        <span class="admin-badge">
-          <span class="admin-dot"></span>
-          ADMIN ONLINE
-        </span>
+      <span class="admin-badge">
+        <span class="admin-dot"></span>
+        ADMIN ONLINE
+      </span>
       }
 
       @if (!isAdmin()) {
-        <button (click)="toggleAdminLogin()" class="btn btn-secondary">
-          <mat-icon>admin_panel_settings</mat-icon>
-          <span>Admin</span>
-        </button>
+      <button (click)="toggleAdminLogin()" class="btn btn-secondary">
+        <mat-icon>admin_panel_settings</mat-icon>
+        <span>Admin</span>
+      </button>
       } @else {
-        <button (click)="logout()" class="btn btn-ghost">
-          <mat-icon>logout</mat-icon>
-          <span>Logout</span>
-        </button>
+      <button (click)="logout()" class="btn btn-ghost">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
       }
     </div>
   </nav>
@@ -41,8 +41,8 @@
 
     <!-- Hero Header -->
     <div class="hero">
-      <div class="hero-eyebrow">⬡ ACTIVE PROTOCOL: ROTI DECIDER ⬡</div>
-      <h1 class="hero-title">INCREMENT<br><span class="hero-accent">COUNTER</span></h1>
+      <div class="hero-eyebrow">⬡ RAMADAN COUNTER PROTOCOL ⬡</div>
+      <h1 class="hero-title">RAMADAN<br><span class="hero-accent">COUNTER</span></h1>
       <p class="hero-sub">
         Live tracking of entity consumption metrics. Submit an application to modify any value.
         Admin approval required. Top 3 give the roti.
@@ -58,98 +58,90 @@
     <!-- Leaderboard -->
     <div class="leaderboard">
       @for (person of rankedCounters(); track person.name; let i = $index) {
-        <div class="leaderboard-row"
-             [class.rank-gold]="i === 0"
-             [class.rank-silver]="i === 1"
-             [class.rank-bronze]="i === 2"
-             [style.animation-delay]="i * 40 + 'ms'">
+      <div class="leaderboard-row" [class.rank-gold]="i === 0" [class.rank-silver]="i === 1"
+        [class.rank-bronze]="i === 2" [style.animation-delay]="i * 40 + 'ms'">
 
-          <div class="row-rank">#{{i + 1}}</div>
+        <div class="row-rank">#{{i + 1}}</div>
 
-          <div class="row-name-wrap">
-            <span class="row-name">{{person.name | uppercase}}</span>
-            @if (i < 3) {
-              <span class="rank-badge" [style.--badge-color]="getRankColor(i)">
-                {{getRankBadge(i)}}
-              </span>
+        <div class="row-name-wrap">
+          <span class="row-name">{{person.name | uppercase}}</span>
+          @if (i < 3) { <span class="rank-badge" [style.--badge-color]="getRankColor(i)">
+            {{getRankBadge(i)}}
+            </span>
             }
-          </div>
-
-          <div class="row-bar-wrap">
-            <div class="row-bar">
-              <div class="row-bar-fill" [style.width]="(person.count / (rankedCounters()[0]?.count || 1)) * 100 + '%'"
-                   [class.gold-fill]="i === 0"
-                   [class.silver-fill]="i === 1"
-                   [class.bronze-fill]="i === 2"></div>
-            </div>
-          </div>
-
-          <div class="row-count" [style.color]="getRankColor(i) || 'white'">{{person.count}}</div>
         </div>
+
+        <div class="row-bar-wrap">
+          <div class="row-bar">
+            <div class="row-bar-fill" [style.width]="(person.count / (rankedCounters()[0]?.count || 1)) * 100 + '%'"
+              [class.gold-fill]="i === 0" [class.silver-fill]="i === 1" [class.bronze-fill]="i === 2"></div>
+          </div>
+        </div>
+
+        <div class="row-count" [style.color]="getRankColor(i) || 'white'">{{person.count}}</div>
+      </div>
       }
     </div>
 
     <!-- ====== ADMIN DASHBOARD ====== -->
     @if (isAdmin()) {
-      <section class="admin-section">
-        <div class="section-header magenta">
-          <span class="section-line"></span>
-          <span>// ADMIN DASHBOARD</span>
-          <span class="section-line"></span>
+    <section class="admin-section">
+      <div class="section-header magenta">
+        <span class="section-line"></span>
+        <span>// ADMIN DASHBOARD</span>
+        <span class="section-line"></span>
+      </div>
+
+      <div class="panel">
+        <h3 class="panel-title">
+          PENDING APPLICATIONS
+          <span class="count-pill">{{applications().length}}</span>
+        </h3>
+
+        @if (applications().length === 0) {
+        <div class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <span>No pending applications in queue.</span>
         </div>
-
-        <div class="panel">
-          <h3 class="panel-title">
-            PENDING APPLICATIONS
-            <span class="count-pill">{{applications().length}}</span>
-          </h3>
-
-          @if (applications().length === 0) {
-            <div class="empty-state">
-              <mat-icon>inbox</mat-icon>
-              <span>No pending applications in queue.</span>
-            </div>
-          } @else {
-            <div class="app-list">
-              @for (app of applications(); track app.id) {
-                <div class="app-card">
-                  <div class="app-info">
-                    <div class="app-header-row">
-                      <span class="app-name">{{app.name | uppercase}}</span>
-                      <span class="app-type-badge"
-                            [class.type-inc]="app.type === 'increment'"
-                            [class.type-dec]="app.type === 'decrement'">
-                        {{app.type === 'increment' ? '▲' : '▼'}} {{app.type | uppercase}} ({{app.type === 'decrement' ? '-' : '+'}}{{app.amount}})
-                      </span>
-                    </div>
-                    <div class="app-reason">
-                      <span class="reason-label">REASON:</span> {{app.reason}}
-                    </div>
-                    <div class="approval-row">
-                      <div class="approval-bar">
-                        <div class="approval-fill" [style.width]="(app.approvals.length / 1) * 100 + '%'"></div>
-                      </div>
-                      <span class="approval-text">{{app.approvals.length}}/1 APPROVAL</span>
-                    </div>
-                  </div>
-                  <div class="app-actions">
-                    <button (click)="approveApplication(app)"
-                            [disabled]="hasApproved(app)"
-                            class="btn btn-approve">
-                      <mat-icon>check</mat-icon>
-                      {{ hasApproved(app) ? 'APPROVED' : 'APPROVE' }}
-                    </button>
-                    <button (click)="rejectApplication(app)" class="btn btn-reject">
-                      <mat-icon>close</mat-icon>
-                      REJECT
-                    </button>
-                  </div>
+        } @else {
+        <div class="app-list">
+          @for (app of applications(); track app.id) {
+          <div class="app-card">
+            <div class="app-info">
+              <div class="app-header-row">
+                <span class="app-name">{{app.name | uppercase}}</span>
+                <span class="app-type-badge" [class.type-inc]="app.type === 'increment'"
+                  [class.type-dec]="app.type === 'decrement'">
+                  {{app.type === 'increment' ? '▲' : '▼'}} {{app.type | uppercase}} ({{app.type === 'decrement' ? '-' :
+                  '+'}}{{app.amount}})
+                </span>
+              </div>
+              <div class="app-reason">
+                <span class="reason-label">REASON:</span> {{app.reason}}
+              </div>
+              <div class="approval-row">
+                <div class="approval-bar">
+                  <div class="approval-fill" [style.width]="(app.approvals.length / 1) * 100 + '%'"></div>
                 </div>
-              }
+                <span class="approval-text">{{app.approvals.length}}/1 APPROVAL</span>
+              </div>
             </div>
+            <div class="app-actions">
+              <button (click)="approveApplication(app)" [disabled]="hasApproved(app)" class="btn btn-approve">
+                <mat-icon>check</mat-icon>
+                {{ hasApproved(app) ? 'APPROVED' : 'APPROVE' }}
+              </button>
+              <button (click)="rejectApplication(app)" class="btn btn-reject">
+                <mat-icon>close</mat-icon>
+                REJECT
+              </button>
+            </div>
+          </div>
           }
         </div>
-      </section>
+        }
+      </div>
+    </section>
     }
 
     <!-- ====== SYSTEM LOGS ====== -->
@@ -162,18 +154,17 @@
 
       <div class="panel logs-panel">
         @for (log of logs(); track log.id) {
-          <div class="log-entry"
-               [class.log-approved]="log.status === 'approved'"
-               [class.log-rejected]="log.status === 'rejected'">
-            <span class="log-time">[{{log.timestamp | date:'short'}}]</span>
-            <span>{{log.message}}</span>
-          </div>
+        <div class="log-entry" [class.log-approved]="log.status === 'approved'"
+          [class.log-rejected]="log.status === 'rejected'">
+          <span class="log-time">[{{log.timestamp | date:'short'}}]</span>
+          <span>{{log.message}}</span>
+        </div>
         }
         @if (logs().length === 0) {
-          <div class="empty-state">
-            <mat-icon>terminal</mat-icon>
-            <span>No logs recorded yet.</span>
-          </div>
+        <div class="empty-state">
+          <mat-icon>terminal</mat-icon>
+          <span>No logs recorded yet.</span>
+        </div>
         }
       </div>
     </section>
@@ -182,90 +173,86 @@
 
   <!-- Footer -->
   <footer class="footer">
-    ROTI_NEXUS v3.0 &nbsp;·&nbsp; SINGLE ADMIN PROTOCOL
+    RAMADAN_COUNTER v3.0 &nbsp;·&nbsp; SINGLE ADMIN PROTOCOL
   </footer>
 
   <!-- =========== MODALS =========== -->
 
   <!-- Admin Login Modal -->
   @if (showAdminLogin()) {
-    <div class="modal-overlay" (click)="toggleAdminLogin()">
-      <div class="modal" (click)="$event.stopPropagation()">
-        <button (click)="toggleAdminLogin()" class="modal-close">
-          <mat-icon>close</mat-icon>
+  <div class="modal-overlay" (click)="toggleAdminLogin()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button (click)="toggleAdminLogin()" class="modal-close">
+        <mat-icon>close</mat-icon>
+      </button>
+      <div class="modal-icon magenta-icon"><mat-icon>lock</mat-icon></div>
+      <h2 class="modal-title">ADMIN AUTH</h2>
+      <p class="modal-sub">Enter your admin access key to continue.</p>
+      <form [formGroup]="loginForm" (ngSubmit)="attemptLogin()" class="modal-form">
+        <div class="field">
+          <label class="field-label">ACCESS KEY</label>
+          <input type="password" formControlName="password" class="field-input" placeholder="Enter password...">
+        </div>
+        <button type="submit" [disabled]="!loginForm.valid" class="btn btn-primary w-full">
+          Authenticate
         </button>
-        <div class="modal-icon magenta-icon"><mat-icon>lock</mat-icon></div>
-        <h2 class="modal-title">ADMIN AUTH</h2>
-        <p class="modal-sub">Enter your admin access key to continue.</p>
-        <form [formGroup]="loginForm" (ngSubmit)="attemptLogin()" class="modal-form">
-          <div class="field">
-            <label class="field-label">ACCESS KEY</label>
-            <input type="password" formControlName="password"
-                   class="field-input"
-                   placeholder="Enter password...">
-          </div>
-          <button type="submit" [disabled]="!loginForm.valid" class="btn btn-primary w-full">
-            Authenticate
-          </button>
-        </form>
-      </div>
+      </form>
     </div>
+  </div>
   }
 
   <!-- Application Modal -->
   @if (showAppForm()) {
-    <div class="modal-overlay" (click)="toggleAppForm()">
-      <div class="modal modal-wide" (click)="$event.stopPropagation()">
-        <button (click)="toggleAppForm()" class="modal-close">
-          <mat-icon>close</mat-icon>
+  <div class="modal-overlay" (click)="toggleAppForm()">
+    <div class="modal modal-wide" (click)="$event.stopPropagation()">
+      <button (click)="toggleAppForm()" class="modal-close">
+        <mat-icon>close</mat-icon>
+      </button>
+      <div class="modal-icon cyan-icon"><mat-icon>edit_note</mat-icon></div>
+      <h2 class="modal-title">SUBMIT APPLICATION</h2>
+      <p class="modal-sub">
+        Requires 1 Admin approval to execute.
+        @if (isAdmin()) {
+        <br><span class="admin-note">Your approval will auto-confirm this request.</span>
+        }
+      </p>
+
+      <form [formGroup]="appForm" (ngSubmit)="submitApplication()" class="modal-form">
+        <div class="field">
+          <label class="field-label">REQUEST TYPE</label>
+          <select formControlName="type" class="field-input field-select">
+            <option value="increment">⬆ Increment Counter</option>
+            <option value="decrement">⬇ Decrement Counter</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">TARGET ENTITY</label>
+          <select formControlName="name" class="field-input field-select">
+            @for (name of validNames(); track name) {
+            <option [value]="name">{{name | uppercase}}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">AMOUNT</label>
+          <input type="number" formControlName="amount" class="field-input" min="1">
+        </div>
+
+        <div class="field">
+          <label class="field-label">JUSTIFICATION / REASON</label>
+          <textarea formControlName="reason" rows="3" class="field-input"
+            placeholder="Provide a detailed reason (min 5 chars)..."></textarea>
+        </div>
+
+        <button type="submit" [disabled]="!appForm.valid || processing()" class="btn btn-primary w-full">
+          <mat-icon>send</mat-icon>
+          Transmit Request
         </button>
-        <div class="modal-icon cyan-icon"><mat-icon>edit_note</mat-icon></div>
-        <h2 class="modal-title">SUBMIT APPLICATION</h2>
-        <p class="modal-sub">
-          Requires 1 Admin approval to execute.
-          @if (isAdmin()) {
-            <br><span class="admin-note">Your approval will auto-confirm this request.</span>
-          }
-        </p>
-
-        <form [formGroup]="appForm" (ngSubmit)="submitApplication()" class="modal-form">
-          <div class="field">
-            <label class="field-label">REQUEST TYPE</label>
-            <select formControlName="type" class="field-input field-select">
-              <option value="increment">⬆ Increment Counter</option>
-              <option value="decrement">⬇ Decrement Counter</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label class="field-label">TARGET ENTITY</label>
-            <select formControlName="name" class="field-input field-select">
-              @for (name of validNames(); track name) {
-                <option [value]="name">{{name | uppercase}}</option>
-              }
-            </select>
-          </div>
-
-          <div class="field">
-            <label class="field-label">AMOUNT</label>
-            <input type="number" formControlName="amount" class="field-input" min="1">
-          </div>
-
-          <div class="field">
-            <label class="field-label">JUSTIFICATION / REASON</label>
-            <textarea formControlName="reason" rows="3"
-                      class="field-input"
-                      placeholder="Provide a detailed reason (min 5 chars)..."></textarea>
-          </div>
-
-          <button type="submit" [disabled]="!appForm.valid || processing()"
-                  class="btn btn-primary w-full">
-            <mat-icon>send</mat-icon>
-            Transmit Request
-          </button>
-        </form>
-      </div>
+      </form>
     </div>
+  </div>
   }
 
 </div>
