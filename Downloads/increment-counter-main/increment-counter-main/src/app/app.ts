@@ -8,7 +8,7 @@ import { createClient, SupabaseClient, RealtimeChannel } from '@supabase/supabas
 const SUPABASE_URL = 'https://wcylvnumkdogurygzaiw.supabase.co';
 const SUPABASE_ANON_KEY: string = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjeWx2bnVta2RvZ3VyeWd6YWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwOTIwODMsImV4cCI6MjA4NzY2ODA4M30.HwOInQFVS0I4a-QqMSF23kVp1WmZUBRiBg5CWBiegdg';
 
-type AdminRole = 'ALPHA' | 'BETA' | 'GAMMA';
+type AdminRole = 'ADMIN';
 
 interface RotiEntry { name: string; count: number; }
 
@@ -27,9 +27,7 @@ interface Application {
 interface LogEntry { id: number; message: string; status: string; timestamp: number; }
 
 const ADMIN_PASSWORDS: Record<string, AdminRole> = {
-  'PASS_ALPHA': 'ALPHA',
-  'PASS_BETA': 'BETA',
-  'PASS_GAMMA': 'GAMMA',
+  'chokacancel': 'ADMIN',
 };
 
 const DEFAULT_COUNTERS: RotiEntry[] = [
@@ -213,7 +211,7 @@ export class App implements OnInit, OnDestroy {
     this.applications.update(a => a.map(x => x.id === app.id ? { ...x, approvals: newApprovals } : x));
     this.cdr.markForCheck();
 
-    if (newApprovals.length >= 3) {
+    if (newApprovals.length >= 1) {
       if (this.supabaseReady) {
         const { data: row } = await this.supabase.from('counters').select('count').eq('name', app.name).single();
         if (row) {
