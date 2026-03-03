@@ -1,259 +1,322 @@
-<div class="app-shell">
-  <!-- Animated background particles -->
-  <div class="bg-orbs">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
+<div class="min-h-screen relative bg-[#050505] text-white font-sans selection:bg-[#00f3ff] selection:text-black pb-20">
+  <!-- Scanlines & Grid -->
+  <div class="scanlines pointer-events-none"></div>
+  <div class="fixed inset-0 z-0 pointer-events-none">
+    <div class="absolute inset-0 bg-grid opacity-30"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/80 to-[#050505]"></div>
   </div>
-  <div class="grid-overlay"></div>
 
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="brand">
-      <span class="brand-dot"></span>
-      <span class="brand-name">RAMADAN_COUNTER</span>
-    </div>
+  <!-- Content -->
+  <div class="relative z-10 flex flex-col min-h-screen">
 
-    <div class="nav-actions">
-      @if (isAdmin()) {
-      <span class="admin-badge">
-        <span class="admin-dot"></span>
-        ADMIN ONLINE
-      </span>
-      }
+    <!-- Navbar -->
+    <nav
+      class="flex items-center justify-between px-4 md:px-8 py-4 md:py-6 border-b border-white/5 backdrop-blur-md bg-[#050505]/50 sticky top-0 z-40">
+      <div class="flex items-center gap-2">
+        <span
+          class="text-xl md:text-2xl font-bold tracking-widest text-[#00f3ff] drop-shadow-[0_0_8px_rgba(0,243,255,0.5)]">ROTI_NEXUS</span>
+      </div>
 
-      @if (!isAdmin()) {
-      <button (click)="toggleAdminLogin()" class="btn btn-secondary">
-        <mat-icon>admin_panel_settings</mat-icon>
-        <span>Admin</span>
-      </button>
-      } @else {
-      <button (click)="logout()" class="btn btn-ghost">
-        <mat-icon>logout</mat-icon>
-        <span>Logout</span>
-      </button>
-      }
-    </div>
-  </nav>
+      <div class="flex items-center gap-2 md:gap-4">
+        @if (isAdmin()) {
+        <span
+          class="font-mono text-[10px] md:text-xs text-[#ff00ff] border border-[#ff00ff]/30 px-2 md:px-3 py-1 rounded bg-[#ff00ff]/10">
+          ADMIN: {{currentAdmin()}}
+        </span>
+        }
 
-  <!-- Main content -->
-  <main class="main-content">
+        @if (!isAdmin()) {
+        <button (click)="toggleAdminLogin()"
+          class="px-4 md:px-6 py-2 font-mono text-[10px] md:text-xs tracking-widest rounded-sm btn-glow-magenta uppercase cursor-pointer flex items-center gap-1 md:gap-2">
+          <mat-icon class="text-[14px] md:text-[16px] w-4 h-4">admin_panel_settings</mat-icon> Admin
+        </button>
+        } @else {
+        <button (click)="logout()"
+          class="px-4 md:px-6 py-2 font-mono text-[10px] md:text-xs tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer flex items-center gap-1 md:gap-2">
+          <mat-icon class="text-[14px] md:text-[16px] w-4 h-4">logout</mat-icon> Disconnect
+        </button>
+        }
+      </div>
+    </nav>
 
-    <!-- Hero Header -->
-    <div class="hero">
-      <div class="hero-eyebrow">⬡ RAMADAN COUNTER PROTOCOL ⬡</div>
-      <h1 class="hero-title">RAMADAN<br><span class="hero-accent">COUNTER</span></h1>
-      <p class="hero-sub">
-        Live tracking of entity consumption metrics. Submit an application to modify any value.
-        Admin approval required. Top 3 give the roti.
-      </p>
+    <main class="flex-grow flex flex-col items-center w-full max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
+
+      <!-- Header -->
+      <div class="text-center mb-10 md:mb-16 mt-4 md:mt-8">
+        <div
+          class="font-mono text-[10px] md:text-xs tracking-[0.2em] text-[#00f3ff] mb-3 md:mb-4 drop-shadow-[0_0_5px_rgba(0,243,255,0.5)]">
+          // ACTIVE PROTOCOL: ROTI DECIDER
+        </div>
+        <h1 class="text-4xl md:text-7xl font-bold tracking-tighter mb-4 md:mb-6 text-gradient">
+          INCREMENT COUNTER
+        </h1>
+        <p class="text-gray-400 font-mono text-[10px] md:text-sm max-w-2xl mx-auto leading-relaxed">
+          Live tracking of all entity consumption metrics. Everyone must submit an application to modify values.
+          3 Admin approvals required. No new users can be added. Top 3 give the roti.
+        </p>
+      </div>
 
       <!-- Submit Application Button -->
-      <button (click)="toggleAppForm()" class="btn btn-primary hero-cta">
-        <mat-icon>add_circle</mat-icon>
-        Submit Update Application
-      </button>
-    </div>
+      <div class="flex justify-center w-full mb-10 md:mb-16">
+        <button (click)="toggleAppForm()"
+          class="px-6 md:px-8 py-3 md:py-4 font-mono text-xs md:text-sm tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer flex items-center gap-2 md:gap-3">
+          <mat-icon>description</mat-icon> Submit Update Application
+        </button>
+      </div>
 
-    <!-- Leaderboard -->
-    <div class="leaderboard">
-      @for (person of rankedCounters(); track person.name; let i = $index) {
-      <div class="leaderboard-row" [class.rank-gold]="i === 0" [class.rank-silver]="i === 1"
-        [class.rank-bronze]="i === 2" [style.animation-delay]="i * 40 + 'ms'">
+      <!-- Ranked Counters List (Single Column) -->
+      <div class="flex flex-col gap-3 md:gap-4 w-full mb-10 md:mb-16">
+        @for (person of rankedCounters(); track person.name; let i = $index) {
+        <div class="cyber-card p-3 md:p-5 rounded-lg flex items-center justify-between relative group transition-all"
+          [style.border-color]="getRankColor(i) || 'rgba(255,255,255,0.1)'"
+          [style.box-shadow]="i < 3 ? '0 0 15px ' + getRankColor(i) + '33' : 'none'">
 
-        <div class="row-rank">#{{i + 1}}</div>
+          <!-- Rank + Name -->
+          <div class="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+            <div class="text-lg md:text-2xl font-bold w-6 md:w-8 text-center shrink-0"
+              [style.color]="getRankColor(i) || '#4b5563'">#{{i + 1}}</div>
 
-        <div class="row-name-wrap">
-          <span class="row-name">{{person.name | uppercase}}</span>
-          @if (i < 3) { <span class="rank-badge" [style.--badge-color]="getRankColor(i)">
-            {{getRankBadge(i)}}
-            </span>
+            <div class="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+              <div class="text-sm md:text-lg font-mono tracking-wider uppercase truncate">{{person.name}}</div>
+
+              @if (i < 3) { <div
+                class="hidden md:block text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-sm whitespace-nowrap shrink-0"
+                [style.background-color]="getRankColor(i)" [style.color]="i === 2 ? 'white' : 'black'"
+                [style.box-shadow]="'0 0 10px ' + getRankColor(i)">
+                {{getRankBadge(i)}}
+            </div>
             }
-        </div>
-
-        <div class="row-bar-wrap">
-          <div class="row-bar">
-            <div class="row-bar-fill" [style.width]="(person.count / (rankedCounters()[0]?.count || 1)) * 100 + '%'"
-              [class.gold-fill]="i === 0" [class.silver-fill]="i === 1" [class.bronze-fill]="i === 2"></div>
           </div>
         </div>
 
-        <div class="row-count" [style.color]="getRankColor(i) || 'white'">{{person.count}}</div>
+        <!-- Count -->
+        <div class="text-2xl md:text-4xl font-bold shrink-0 ml-4 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+          [style.color]="getRankColor(i) || 'white'">
+          {{person.count}}
+        </div>
+      </div>
+
+      <!-- Mobile Badge (below the card) -->
+      @if (i < 3) { <div class="md:hidden flex justify-center -mt-2 mb-1">
+        <div class="text-[9px] font-bold px-2 py-0.5 rounded-sm whitespace-nowrap"
+          [style.background-color]="getRankColor(i)" [style.color]="i === 2 ? 'white' : 'black'"
+          [style.box-shadow]="'0 0 10px ' + getRankColor(i)">
+          {{getRankBadge(i)}}
+        </div>
+  </div>
+  }
+  }
+</div>
+
+<!-- =============== ADMIN DASHBOARD =============== -->
+@if (isAdmin()) {
+<div class="w-full border-t border-white/10 pt-10 md:pt-16 mt-4 md:mt-8">
+  <div
+    class="font-mono text-xs tracking-[0.2em] text-[#ff00ff] mb-6 md:mb-8 drop-shadow-[0_0_5px_rgba(255,0,255,0.5)] flex items-center gap-4">
+    <span class="w-8 h-[1px] bg-[#ff00ff]/50"></span>
+    // ADMIN DASHBOARD — {{currentAdmin()}}
+    <span class="w-8 h-[1px] bg-[#ff00ff]/50"></span>
+  </div>
+
+  <!-- Pending Applications -->
+  <div class="cyber-card p-4 md:p-8 rounded-lg w-full mb-8">
+    <h3 class="text-lg md:text-xl font-bold mb-4 md:mb-6 tracking-wide text-[#ff00ff]">
+      PENDING APPLICATIONS ({{applications().length}})
+    </h3>
+
+    @if (applications().length === 0) {
+    <div
+      class="text-gray-500 font-mono text-sm italic py-6 md:py-8 text-center border border-dashed border-white/10 rounded">
+      No pending applications in the queue.
+    </div>
+    } @else {
+    <div class="flex flex-col gap-4">
+      @for (app of applications(); track app.id) {
+      <div class="bg-black/40 border border-white/5 p-4 rounded flex flex-col gap-4">
+        <!-- App Info -->
+        <div class="flex-grow">
+          <div class="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
+            <span class="font-bold text-base md:text-lg uppercase">{{app.name}}</span>
+            <span class="px-2 py-0.5 text-xs font-mono rounded uppercase border"
+              [class.text-[#00f3ff]]="app.type === 'increment'" [class.border-[#00f3ff]/30]="app.type === 'increment'"
+              [class.bg-[#00f3ff]/10]="app.type === 'increment'" [class.text-[#ff00ff]]="app.type === 'decrement'"
+              [class.border-[#ff00ff]/30]="app.type === 'decrement'" [class.bg-[#ff00ff]/10]="app.type === 'decrement'">
+              {{app.type === 'decrement' ? 'DECREMENT' : 'INCREMENT'}} ({{app.type === 'decrement' ? '-' :
+              '+'}}{{app.amount}})
+            </span>
+            @if (app.submitted_by) {
+            <span class="text-[10px] text-gray-500 font-mono">by {{app.submitted_by}}</span>
+            }
+          </div>
+          <div class="text-gray-400 text-xs md:text-sm font-mono mb-3">
+            <span class="text-gray-600">REASON:</span> {{app.reason}}
+          </div>
+
+          <!-- Approval Progress -->
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-2">
+              <div class="h-1.5 w-24 md:w-32 bg-black/50 rounded-full overflow-hidden border border-white/10">
+                <div class="h-full bg-[#00f3ff] transition-all duration-500"
+                  [style.width]="(app.approvals.length / 3) * 100 + '%'"></div>
+              </div>
+              <span class="font-mono text-[10px] text-[#00f3ff]">{{app.approvals.length}}/3 APPROVALS</span>
+            </div>
+            @if (app.approvals.length > 0) {
+            <div class="flex gap-1 mt-1 flex-wrap">
+              @for (admin of app.approvals; track admin) {
+              <span class="px-1.5 py-0.5 bg-white/10 text-white text-[9px] rounded font-mono">{{admin}}</span>
+              }
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-2 shrink-0">
+          <button (click)="approveApplication(app)" [disabled]="hasApproved(app)"
+            class="px-3 md:px-4 py-2 bg-[#00f3ff]/10 text-[#00f3ff] border border-[#00f3ff]/50 hover:bg-[#00f3ff]/20 font-mono text-[10px] md:text-xs tracking-wider rounded transition-colors flex items-center gap-1 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer">
+            <mat-icon class="text-[14px] md:text-[16px] w-4 h-4">check</mat-icon>
+            {{ hasApproved(app) ? 'APPROVED' : 'APPROVE' }}
+          </button>
+          <button (click)="rejectApplication(app)"
+            class="px-3 md:px-4 py-2 bg-[#ff00ff]/10 text-[#ff00ff] border border-[#ff00ff]/50 hover:bg-[#ff00ff]/20 font-mono text-[10px] md:text-xs tracking-wider rounded transition-colors flex items-center gap-1 cursor-pointer">
+            <mat-icon class="text-[14px] md:text-[16px] w-4 h-4">close</mat-icon> REJECT
+          </button>
+        </div>
       </div>
       }
     </div>
-
-    <!-- ====== ADMIN DASHBOARD ====== -->
-    @if (isAdmin()) {
-    <section class="admin-section">
-      <div class="section-header magenta">
-        <span class="section-line"></span>
-        <span>// ADMIN DASHBOARD</span>
-        <span class="section-line"></span>
-      </div>
-
-      <div class="panel">
-        <h3 class="panel-title">
-          PENDING APPLICATIONS
-          <span class="count-pill">{{applications().length}}</span>
-        </h3>
-
-        @if (applications().length === 0) {
-        <div class="empty-state">
-          <mat-icon>inbox</mat-icon>
-          <span>No pending applications in queue.</span>
-        </div>
-        } @else {
-        <div class="app-list">
-          @for (app of applications(); track app.id) {
-          <div class="app-card">
-            <div class="app-info">
-              <div class="app-header-row">
-                <span class="app-name">{{app.name | uppercase}}</span>
-                <span class="app-type-badge" [class.type-inc]="app.type === 'increment'"
-                  [class.type-dec]="app.type === 'decrement'">
-                  {{app.type === 'increment' ? '▲' : '▼'}} {{app.type | uppercase}} ({{app.type === 'decrement' ? '-' :
-                  '+'}}{{app.amount}})
-                </span>
-              </div>
-              <div class="app-reason">
-                <span class="reason-label">REASON:</span> {{app.reason}}
-              </div>
-              <div class="approval-row">
-                <div class="approval-bar">
-                  <div class="approval-fill" [style.width]="(app.approvals.length / 1) * 100 + '%'"></div>
-                </div>
-                <span class="approval-text">{{app.approvals.length}}/1 APPROVAL</span>
-              </div>
-            </div>
-            <div class="app-actions">
-              <button (click)="approveApplication(app)" [disabled]="hasApproved(app)" class="btn btn-approve">
-                <mat-icon>check</mat-icon>
-                {{ hasApproved(app) ? 'APPROVED' : 'APPROVE' }}
-              </button>
-              <button (click)="rejectApplication(app)" class="btn btn-reject">
-                <mat-icon>close</mat-icon>
-                REJECT
-              </button>
-            </div>
-          </div>
-          }
-        </div>
-        }
-      </div>
-    </section>
     }
+  </div>
+</div>
+}
 
-    <!-- ====== SYSTEM LOGS ====== -->
-    <section class="logs-section">
-      <div class="section-header cyan">
-        <span class="section-line"></span>
-        <span>// SYSTEM LOGS</span>
-        <span class="section-line"></span>
+<!-- =============== SYSTEM LOGS =============== -->
+<div class="w-full" [class.border-t]="!isAdmin()" [class.border-white/10]="!isAdmin()" [class.pt-10]="!isAdmin()"
+  [class.md:pt-16]="!isAdmin()" [class.mt-4]="!isAdmin()">
+  <div
+    class="font-mono text-xs tracking-[0.2em] text-[#00f3ff] mb-6 md:mb-8 drop-shadow-[0_0_5px_rgba(0,243,255,0.5)] flex items-center gap-4">
+    <span class="w-8 h-[1px] bg-[#00f3ff]/50"></span>
+    // SYSTEM LOGS
+    <span class="w-8 h-[1px] bg-[#00f3ff]/50"></span>
+  </div>
+
+  <div class="cyber-card p-4 md:p-6 rounded-lg w-full">
+    <div class="flex flex-col gap-2 max-h-80 overflow-y-auto pr-2">
+      @for (log of logs(); track log.id) {
+      <div class="font-mono text-[10px] md:text-xs p-2 md:p-3 border-l-2 bg-black/40"
+        [class.border-[#00f3ff]]="log.status === 'approved'" [class.text-[#00f3ff]]="log.status === 'approved'"
+        [class.border-[#ff00ff]]="log.status === 'rejected'" [class.text-[#ff00ff]]="log.status === 'rejected'">
+        <span class="opacity-50 mr-2 text-white">[{{log.timestamp | date:'short'}}]</span>
+        {{log.message}}
       </div>
-
-      <div class="panel logs-panel">
-        @for (log of logs(); track log.id) {
-        <div class="log-entry" [class.log-approved]="log.status === 'approved'"
-          [class.log-rejected]="log.status === 'rejected'">
-          <span class="log-time">[{{log.timestamp | date:'short'}}]</span>
-          <span>{{log.message}}</span>
-        </div>
-        }
-        @if (logs().length === 0) {
-        <div class="empty-state">
-          <mat-icon>terminal</mat-icon>
-          <span>No logs recorded yet.</span>
-        </div>
-        }
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Footer -->
-  <footer class="footer">
-    RAMADAN_COUNTER v3.0 &nbsp;·&nbsp; SINGLE ADMIN PROTOCOL
-  </footer>
-
-  <!-- =========== MODALS =========== -->
-
-  <!-- Admin Login Modal -->
-  @if (showAdminLogin()) {
-  <div class="modal-overlay" (click)="toggleAdminLogin()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <button (click)="toggleAdminLogin()" class="modal-close">
-        <mat-icon>close</mat-icon>
-      </button>
-      <div class="modal-icon magenta-icon"><mat-icon>lock</mat-icon></div>
-      <h2 class="modal-title">ADMIN AUTH</h2>
-      <p class="modal-sub">Enter your admin access key to continue.</p>
-      <form [formGroup]="loginForm" (ngSubmit)="attemptLogin()" class="modal-form">
-        <div class="field">
-          <label class="field-label">ACCESS KEY</label>
-          <input type="password" formControlName="password" class="field-input" placeholder="Enter password...">
-        </div>
-        <button type="submit" [disabled]="!loginForm.valid" class="btn btn-primary w-full">
-          Authenticate
-        </button>
-      </form>
+      }
+      @if (logs().length === 0) {
+      <div class="text-gray-500 font-mono text-sm italic text-center py-4">No logs recorded yet.</div>
+      }
     </div>
   </div>
-  }
+</div>
 
-  <!-- Application Modal -->
-  @if (showAppForm()) {
-  <div class="modal-overlay" (click)="toggleAppForm()">
-    <div class="modal modal-wide" (click)="$event.stopPropagation()">
-      <button (click)="toggleAppForm()" class="modal-close">
-        <mat-icon>close</mat-icon>
+</main>
+
+<!-- Footer -->
+<footer class="text-center py-4 text-gray-600 font-mono text-[10px] tracking-widest border-t border-white/5">
+  ROTI_NEXUS v2.0 // 3-ADMIN APPROVAL PROTOCOL
+</footer>
+</div>
+
+<!-- =============== MODALS =============== -->
+
+<!-- Admin Login Modal -->
+@if (showAdminLogin()) {
+<div class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+  (click)="toggleAdminLogin()">
+  <div class="cyber-card p-6 md:p-8 rounded-xl w-full max-w-md relative border-[#ff00ff]/30"
+    (click)="$event.stopPropagation()">
+    <button (click)="toggleAdminLogin()" class="absolute top-4 right-4 text-gray-500 hover:text-white cursor-pointer">
+      <mat-icon>close</mat-icon>
+    </button>
+    <h2 class="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-[#ff00ff] tracking-widest">ADMIN_AUTH</h2>
+    <p class="text-gray-400 font-mono text-[10px] md:text-xs mb-4 md:mb-6">
+      Enter one of the 3 admin passwords:<br>
+      <span class="text-gray-600">ALPHA • BETA • GAMMA</span>
+    </p>
+    <form [formGroup]="loginForm" (ngSubmit)="attemptLogin()" class="flex flex-col gap-4 md:gap-6">
+      <div>
+        <label class="block font-mono text-[10px] md:text-xs text-gray-400 mb-2">ACCESS KEY</label>
+        <input type="password" formControlName="password"
+          class="w-full bg-black/50 border border-[#ff00ff]/30 focus:border-[#ff00ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors rounded"
+          placeholder="Enter password...">
+      </div>
+      <button type="submit" [disabled]="!loginForm.valid"
+        class="w-full py-3 md:py-4 font-mono text-xs md:text-sm tracking-widest rounded-sm btn-glow-magenta uppercase cursor-pointer disabled:opacity-50">
+        Authenticate
       </button>
-      <div class="modal-icon cyan-icon"><mat-icon>edit_note</mat-icon></div>
-      <h2 class="modal-title">SUBMIT APPLICATION</h2>
-      <p class="modal-sub">
-        Requires 1 Admin approval to execute.
-        @if (isAdmin()) {
-        <br><span class="admin-note">Your approval will auto-confirm this request.</span>
-        }
-      </p>
-
-      <form [formGroup]="appForm" (ngSubmit)="submitApplication()" class="modal-form">
-        <div class="field">
-          <label class="field-label">REQUEST TYPE</label>
-          <select formControlName="type" class="field-input field-select">
-            <option value="increment">⬆ Increment Counter</option>
-            <option value="decrement">⬇ Decrement Counter</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label class="field-label">TARGET ENTITY</label>
-          <select formControlName="name" class="field-input field-select">
-            @for (name of validNames(); track name) {
-            <option [value]="name">{{name | uppercase}}</option>
-            }
-          </select>
-        </div>
-
-        <div class="field">
-          <label class="field-label">AMOUNT</label>
-          <input type="number" formControlName="amount" class="field-input" min="1">
-        </div>
-
-        <div class="field">
-          <label class="field-label">JUSTIFICATION / REASON</label>
-          <textarea formControlName="reason" rows="3" class="field-input"
-            placeholder="Provide a detailed reason (min 5 chars)..."></textarea>
-        </div>
-
-        <button type="submit" [disabled]="!appForm.valid || processing()" class="btn btn-primary w-full">
-          <mat-icon>send</mat-icon>
-          Transmit Request
-        </button>
-      </form>
-    </div>
+    </form>
   </div>
-  }
+</div>
+}
+
+<!-- Application Modal -->
+@if (showAppForm()) {
+<div class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+  (click)="toggleAppForm()">
+  <div class="cyber-card p-6 md:p-8 rounded-xl w-full max-w-lg relative border-[#00f3ff]/30"
+    (click)="$event.stopPropagation()">
+    <button (click)="toggleAppForm()" class="absolute top-4 right-4 text-gray-500 hover:text-white cursor-pointer">
+      <mat-icon>close</mat-icon>
+    </button>
+    <h2 class="text-xl md:text-2xl font-bold mb-2 text-[#00f3ff] tracking-widest">SUBMIT_APPLICATION</h2>
+    <p class="text-gray-400 font-mono text-[10px] md:text-xs mb-4 md:mb-6">
+      Requires 3 Admin approvals to execute. All admins must approve.
+      @if (isAdmin()) {
+      <br><span class="text-[#ff00ff]">Your approval ({{currentAdmin()}}) will auto-count as 1/3.</span>
+      }
+    </p>
+
+    <form [formGroup]="appForm" (ngSubmit)="submitApplication()" class="flex flex-col gap-4 md:gap-5">
+      <div>
+        <label class="block font-mono text-[10px] md:text-xs text-gray-400 mb-2">REQUEST TYPE</label>
+        <select formControlName="type"
+          class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors appearance-none rounded">
+          <option value="increment">⬆ Increment Counter</option>
+          <option value="decrement">⬇ Decrement Counter</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-mono text-[10px] md:text-xs text-gray-400 mb-2">TARGET ENTITY</label>
+        <select formControlName="name"
+          class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors appearance-none rounded">
+          @for (name of validNames(); track name) {
+          <option [value]="name">{{name | uppercase}}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-mono text-[10px] md:text-xs text-gray-400 mb-2">AMOUNT</label>
+        <input type="number" formControlName="amount"
+          class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors rounded"
+          min="1">
+      </div>
+
+      <div>
+        <label class="block font-mono text-[10px] md:text-xs text-gray-400 mb-2">JUSTIFICATION / REASON</label>
+        <textarea formControlName="reason" rows="3"
+          class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors resize-none rounded"
+          placeholder="Provide a detailed reason (min 5 chars)..."></textarea>
+      </div>
+
+      <button type="submit" [disabled]="!appForm.valid"
+        class="w-full mt-2 py-3 md:py-4 font-mono text-xs md:text-sm tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+        Transmit Request
+      </button>
+    </form>
+  </div>
+</div>
+}
 
 </div>
 <router-outlet></router-outlet>
